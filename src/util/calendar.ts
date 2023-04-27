@@ -17,7 +17,6 @@ function getRequestId(length: number) {
 export async function makeCalendarAppointment(
   bookerEmail: string,
   bookerName: string,
-  hostEmail: string,
   hostName: string,
   startDate: Date,
   endDate: Date,
@@ -30,11 +29,12 @@ export async function makeCalendarAppointment(
     calendar.events.insert(
       {
         auth: oauthClient,
+        conferenceDataVersion: 1,
         calendarId: "primary",
         requestBody: {
           attendees: [
             {
-              email: hostEmail,
+              email: bookerEmail,
             },
           ],
           start: {
