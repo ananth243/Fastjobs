@@ -10,11 +10,11 @@ export default async function handler(
 ) {
   try {
     if (req.method === "POST") {
-      const SECRET_KEY = process.env.SECRET_KEY as string;
+      const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string;
       if (!req.headers.token)
         return res.status(400).json({ message: "Auth token missing" });
       const token = req.headers.token as string;
-      const { id } = verify(token, SECRET_KEY) as JWTPayload;
+      const { id } = verify(token, JWT_SECRET_KEY) as JWTPayload;
       const slots = req.body.slots as Date[][];
       await db.connect();
       console.log(slots);

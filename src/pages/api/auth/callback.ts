@@ -15,7 +15,7 @@ export default async function handler(
   res: NextApiResponse<Data | Error>
 ) {
   try {
-    const SECRET_KEY = process.env.SECRET_KEY as string;
+    const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string;
     if (!req.query.code)
       return res.status(400).json({ message: "Authorisation code missing" });
     const code = req.query.code as string;
@@ -39,7 +39,7 @@ export default async function handler(
         email,
         refreshToken: tokens.refresh_token,
       });
-    const jwt = sign({ name, email, id: user.id }, SECRET_KEY);
+    const jwt = sign({ name, email, id: user.id }, JWT_SECRET_KEY);
     return res.status(200).json({ jwt });
   } catch (error) {
     console.log(error);

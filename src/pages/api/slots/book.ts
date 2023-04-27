@@ -23,15 +23,15 @@ export default async function handler(
       const user = await User.findOne({ where: { email } });
       if (!user)
         return res.status(500).json({ message: "User does not exist in db" });
-      const SECRET_KEY = process.env.SECRET_KEY as string;
+      const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string;
       if (!req.headers.token)
         return res.status(400).json({ message: "Auth token missing" });
       const token = req.headers.token as string;
       const { email: bookerEmail, name: bookerName } = verify(
         token,
-        SECRET_KEY
+        JWT_SECRET_KEY
       ) as JWTPayload;
-      if (email === bookerEmail || startDate===endDate)
+      if (email === bookerEmail || startDate === endDate)
         return res.status(500).json({ message: "Do not try funnny stuff" });
       const slot = await Slot.findOne({
         where: {
@@ -45,7 +45,10 @@ export default async function handler(
           },
         },
       });
-      if (!slot) return res.status(200).json({ message: "User not free during this slot" });
+      if (!slot)
+        return res
+          .status(200)
+          .json({ message: "User not free during this slot" });
       await makeCalendarAppointment(
         bookerEmail,
         bookerName,
@@ -56,7 +59,7 @@ export default async function handler(
       );
       slot.booked = true;
       await slot.save();
-      return res.json({ message:"Saved slot successfully" });
+      return res.json({ message: "Saved slot successfully" });
     }
   } catch (error) {
     console.error(error);
