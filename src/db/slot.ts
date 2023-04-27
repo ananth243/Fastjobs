@@ -31,10 +31,12 @@ Slot.init(
     start: {
       type: DataTypes.DATE,
       allowNull: false,
+      unique: true,
     },
     end: {
       type: DataTypes.DATE,
       allowNull: false,
+      unique: true,
     },
     booked: {
       type: DataTypes.BOOLEAN,
@@ -44,7 +46,6 @@ Slot.init(
   },
   {
     tableName: "slots",
-    
     sequelize: sequelize,
   }
 );

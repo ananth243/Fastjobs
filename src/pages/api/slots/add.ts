@@ -17,7 +17,6 @@ export default async function handler(
       const { id } = verify(token, JWT_SECRET_KEY) as JWTPayload;
       const slots = req.body.slots as Date[][];
       await db.connect();
-      console.log(slots);
       let bulkCreate = slots.map((slot) => {
         return { start: slot[0], end: slot[1], UserId: id, booked: false };
       });
