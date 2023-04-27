@@ -17,7 +17,7 @@ export default function handler(
   const url = oauthClient.generateAuthUrl({
     access_type: "offline",
     scope: scopes,
-    // prompt: "consent", // Use this for development
+    prompt: "consent", // Use this for development
   });
   return res.json({ url });
 }
