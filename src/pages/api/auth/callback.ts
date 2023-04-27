@@ -5,6 +5,7 @@ import { google } from "googleapis";
 import db from "@/db/db";
 import { User } from "@/db/user";
 import { Error } from "@/types/commonTypes";
+import { ZodError, z } from "zod";
 
 type Data = {
   jwt: string;
@@ -19,9 +20,10 @@ export default async function handler(
     if (!req.query.code)
       return res.status(400).json({ message: "Authorisation code missing" });
     const code = req.query.code as string;
+    const query = z.string();
+    query.parse(code);
     const { tokens } = await oauthClient.getToken(code);
     oauthClient.setCredentials(tokens);
-    console.log(tokens);
     if (!tokens.access_token || !tokens.refresh_token)
       return res.status(400).json({ message: "Invalid tokens" });
     const userInfo = await google
@@ -42,7 +44,9 @@ export default async function handler(
     const jwt = sign({ name, email, id: user.id }, JWT_SECRET_KEY);
     return res.status(200).json({ jwt });
   } catch (error) {
-    console.log(error);
+    if (error instanceof ZodError) {
+      return res.status(500).json({ message: error.message });
+    }
     return res.status(500).json({ message: "Internal Server Error" });
   }
 }
