@@ -1,4 +1,3 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { oauthClient } from "@/util/auth";
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -16,8 +15,9 @@ export default function handler(
     "https://www.googleapis.com/auth/userinfo.email",
   ];
   const url = oauthClient.generateAuthUrl({
-    access_type: "online",
+    access_type: "offline",
     scope: scopes,
+    // prompt: "consent", // Use this for development
   });
   return res.json({ url });
 }

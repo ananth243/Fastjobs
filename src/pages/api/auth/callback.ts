@@ -1,12 +1,10 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import { oauthClient } from "@/util/auth";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { decode, sign } from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 import { google } from "googleapis";
-
-type Error = {
-  message: string;
-};
+import db from "@/db/db";
+import { User } from "@/db/user";
+import { Error } from "@/types/commonTypes";
 
 type Data = {
   jwt: string;
@@ -23,14 +21,25 @@ export default async function handler(
     const code = req.query.code as string;
     const { tokens } = await oauthClient.getToken(code);
     oauthClient.setCredentials(tokens);
-    if (!tokens.access_token)
+    console.log(tokens);
+    if (!tokens.access_token || !tokens.refresh_token)
       return res.status(400).json({ message: "Invalid tokens" });
     const userInfo = await google
       .oauth2({ auth: oauthClient, version: "v2" })
       .userinfo.get();
     if (!userInfo) throw new Error("Internal Server Error");
-    const { name, picture, email } = userInfo.data;
-    const jwt = sign({ name, picture, email }, SECRET_KEY);
+    const { name, email } = userInfo.data;
+    if (!email || !name)
+      return res.status(400).json({ message: "Error occurred" });
+    await db.connect();
+    let user = await User.findOne({ where: { email } });
+    if (!user)
+      user = await User.create({
+        name,
+        email,
+        refreshToken: tokens.refresh_token,
+      });
+    const jwt = sign({ name, email, id: user.id }, SECRET_KEY);
     return res.status(200).json({ jwt });
   } catch (error) {
     console.log(error);
